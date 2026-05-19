@@ -1,0 +1,481 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Racing Card Game Scoreboard</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+            font-family: Arial, sans-serif;
+        }
+
+        body {
+            margin: 0;
+            padding: 20px;
+            background: #121212;
+            color: white;
+        }
+
+        h1,
+        h2,
+        h3 {
+            margin-top: 0;
+        }
+
+        .container {
+            max-width: 1100px;
+            margin: auto;
+        }
+
+        .card {
+            background: #1e1e1e;
+            padding: 20px;
+            border-radius: 14px;
+            margin-bottom: 20px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.4);
+        }
+
+        button {
+            padding: 12px 20px;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            background: #4caf50;
+            color: white;
+            font-weight: bold;
+            margin-top: 10px;
+        }
+
+        button:hover {
+            opacity: 0.9;
+        }
+
+        input {
+            padding: 10px;
+            border-radius: 8px;
+            border: none;
+            width: 100%;
+            margin-top: 8px;
+            margin-bottom: 12px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        th,
+        td {
+            border: 1px solid #333;
+            padding: 12px;
+            text-align: center;
+        }
+
+        th {
+            background: #2e2e2e;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .highlight {
+            color: #4caf50;
+            font-weight: bold;
+        }
+
+        .phase {
+            font-size: 20px;
+            margin-bottom: 15px;
+            color: #ffcc00;
+        }
+
+        .scoreboard {
+            margin-top: 20px;
+        }
+
+        .winner {
+            font-size: 28px;
+            color: #4caf50;
+            font-weight: bold;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container">
+
+        <div id="setupCard" class="card">
+            <h1>🏁 Racing Scoreboard</h1>
+
+            <div id="playerCountSection">
+                <h3>How many players? (2-7)</h3>
+                <input type="number" id="playerCount" min="2" max="7">
+                <button onclick="setupNames()">Continue</button>
+            </div>
+
+            <div id="nameSection" class="hidden">
+                <h3>Enter Player Names</h3>
+                <div id="nameInputs"></div>
+                <button onclick="startGame()">Start Game</button>
+            </div>
+        </div>
+
+        <div id="gameCard" class="card hidden">
+
+            <h2 id="roundTitle"></h2>
+            <div class="phase" id="phaseText"></div>
+
+            <div id="turnText"></div>
+
+            <input type="number" id="valueInput" min="0">
+            <button onclick="submitValue()">Submit</button>
+
+            <div class="scoreboard">
+                <table id="scoreTable">
+                    <thead>
+                        <tr id="tableHead">
+                            <th>Round</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tableBody"></tbody>
+                </table>
+            </div>
+
+        </div>
+
+        <div id="endCard" class="card hidden">
+            <h1>🏆 Game Finished</h1>
+            <div id="winnerText"></div>
+
+            <table id="finalTable">
+                <thead>
+                    <tr id="finalHead">
+                        <th>Player</th>
+                        <th>Total Points</th>
+                    </tr>
+                </thead>
+                <tbody id="finalBody"></tbody>
+            </table>
+        </div>
+
+    </div>
+
+    <script>
+
+    let players = [];
+    let totalScores = {};
+    let predictions = {};
+    let actuals = {};
+
+    let currentRoundIndex = 0;
+    let currentPlayerIndex = 0;
+    let phase = "prediction";
+
+    const rounds = [
+        1, 2, 3, 4, 5, 6,
+        "7 I",
+        "7 II",
+        "7 III",
+        6, 5, 4, 3, 2, 1
+    ];
+
+    let startingPlayerIndex = 0;
+
+    function setupNames() {
+
+        const count = parseInt(document.getElementById("playerCount").value);
+
+        if (isNaN(count) || count < 2 || count > 7) {
+            alert("Enter between 2 and 7 players.");
+            return;
+        }
+
+        document.getElementById("nameSection").classList.remove("hidden");
+
+        let html = "";
+
+        for (let i = 0; i < count; i++) {
+            html += `
+                <input type="text" id="player${i}" placeholder="Player ${i + 1} Name">
+            `;
+        }
+
+        document.getElementById("nameInputs").innerHTML = html;
+    }
+
+    function startGame() {
+
+        const count = parseInt(document.getElementById("playerCount").value);
+
+        players = [];
+
+        for (let i = 0; i < count; i++) {
+
+            let name = document.getElementById(`player${i}`).value.trim();
+
+            if (name === "") {
+                name = `Player ${i + 1}`;
+            }
+
+            players.push(name);
+            totalScores[name] = 0;
+        }
+
+        startingPlayerIndex = Math.floor(Math.random() * players.length);
+
+        setupTable();
+
+        document.getElementById("setupCard").classList.add("hidden");
+        document.getElementById("gameCard").classList.remove("hidden");
+
+        startRound();
+    }
+
+    function setupTable() {
+
+        const head = document.getElementById("tableHead");
+
+        players.forEach(player => {
+
+            const th = document.createElement("th");
+            th.innerText = player;
+
+            head.appendChild(th);
+        });
+    }
+
+    function startRound() {
+
+        predictions = {};
+        actuals = {};
+
+        currentPlayerIndex = 0;
+        phase = "prediction";
+
+        updateUI();
+    }
+
+    function getCurrentRoundValue() {
+
+        const round = rounds[currentRoundIndex];
+
+        if (typeof round === "number") {
+            return round;
+        }
+
+        return 7;
+    }
+
+    function updateUI() {
+
+        const roundName = rounds[currentRoundIndex];
+
+        document.getElementById("roundTitle").innerText =
+            `Round ${roundName}`;
+
+        document.getElementById("phaseText").innerText =
+            phase === "prediction"
+                ? "Prediction Phase"
+                : "Actual Result Phase";
+
+        const actualPlayer =
+            players[
+            (startingPlayerIndex + currentPlayerIndex)
+            % players.length
+            ];
+
+        document.getElementById("turnText").innerHTML =
+            `<h3>${actualPlayer}'s Turn</h3>`;
+    }
+
+    function submitValue() {
+
+        const value = parseInt(document.getElementById("valueInput").value);
+
+        if (isNaN(value) || value < 0) {
+            alert("Enter valid number.");
+            return;
+        }
+
+        const player =
+            players[
+            (startingPlayerIndex + currentPlayerIndex)
+            % players.length
+            ];
+
+        const roundValue = getCurrentRoundValue();
+
+        if (phase === "prediction") {
+
+            // LAST PLAYER RULE
+            if (currentPlayerIndex === players.length - 1) {
+
+                let sum = 0;
+
+                for (let p in predictions) {
+                    sum += predictions[p];
+                }
+
+                if (sum + value === roundValue) {
+
+                    alert(
+                        `Total predictions cannot equal ${roundValue}`
+                    );
+
+                    return;
+                }
+            }
+
+            predictions[player] = value;
+
+        } else {
+
+            actuals[player] = value;
+        }
+
+        document.getElementById("valueInput").value = "";
+
+        currentPlayerIndex++;
+
+        if (currentPlayerIndex >= players.length) {
+
+            if (phase === "prediction") {
+
+                // SHOW PREDICTIONS IMMEDIATELY
+                createPredictionRow();
+
+                phase = "actual";
+                currentPlayerIndex = 0;
+
+                updateUI();
+
+            } else {
+
+                finishRound();
+            }
+
+        } else {
+
+            updateUI();
+        }
+    }
+
+    function calculatePoints(prediction) {
+
+        return 10 + (prediction * 2);
+    }
+
+    function createPredictionRow() {
+
+        const row = document.createElement("tr");
+
+        row.id = `round-row-${currentRoundIndex}`;
+
+        const roundCell = document.createElement("td");
+
+        roundCell.innerHTML = `
+            <strong>${rounds[currentRoundIndex]}</strong><br>
+            Predictions
+        `;
+
+        row.appendChild(roundCell);
+
+        players.forEach(player => {
+
+            const td = document.createElement("td");
+
+            td.innerHTML = `
+                Pred: <strong>${predictions[player]}</strong><br>
+                Actual: ?
+            `;
+
+            row.appendChild(td);
+        });
+
+        document.getElementById("tableBody").appendChild(row);
+    }
+
+    function finishRound() {
+
+        const row =
+            document.getElementById(`round-row-${currentRoundIndex}`);
+
+        const cells = row.querySelectorAll("td");
+
+        players.forEach((player, index) => {
+
+            let points = 0;
+
+            if (predictions[player] === actuals[player]) {
+                points = calculatePoints(predictions[player]);
+            }
+
+            totalScores[player] += points;
+
+            cells[index + 1].innerHTML = `
+                Pred: ${predictions[player]}<br>
+                Actual: ${actuals[player]}<br>
+                <span class="highlight">+${points}</span><br>
+                Total: ${totalScores[player]}
+            `;
+        });
+
+        currentRoundIndex++;
+
+        startingPlayerIndex =
+            (startingPlayerIndex + 1)
+            % players.length;
+
+        if (currentRoundIndex >= rounds.length) {
+
+            endGame();
+
+        } else {
+
+            startRound();
+        }
+    }
+
+    function endGame() {
+
+        document.getElementById("gameCard")
+            .classList.add("hidden");
+
+        document.getElementById("endCard")
+            .classList.remove("hidden");
+
+        let sorted = [...players].sort(
+            (a, b) => totalScores[b] - totalScores[a]
+        );
+
+        document.getElementById("winnerText").innerHTML =
+            `<div class="winner">
+                Winner: ${sorted[0]}
+            </div>`;
+
+        const body = document.getElementById("finalBody");
+
+        sorted.forEach(player => {
+
+            const tr = document.createElement("tr");
+
+            tr.innerHTML = `
+                <td>${player}</td>
+                <td>${totalScores[player]}</td>
+            `;
+
+            body.appendChild(tr);
+        });
+    }
+
+</script>
+
+</body>
+
+</html>
