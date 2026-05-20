@@ -274,25 +274,47 @@
 
     function updateUI() {
 
-        const roundName = rounds[currentRoundIndex];
+    const roundName = rounds[currentRoundIndex];
 
-        document.getElementById("roundTitle").innerText =
-            `Round ${roundName}`;
+    document.getElementById("roundTitle").innerText =
+        `Round ${roundName}`;
 
-        document.getElementById("phaseText").innerText =
-            phase === "prediction"
-                ? "Prediction Phase"
-                : "Actual Result Phase";
+    document.getElementById("phaseText").innerText =
+        phase === "prediction"
+            ? "Prediction Phase"
+            : "Actual Result Phase";
 
-        const actualPlayer =
-            players[
-            (startingPlayerIndex + currentPlayerIndex)
-            % players.length
-            ];
+    // CURRENT PLAYER
+    const actualPlayer =
+        players[
+        (startingPlayerIndex + currentPlayerIndex)
+        % players.length
+        ];
 
-        document.getElementById("turnText").innerHTML =
-            `<h3>${actualPlayer}'s Turn</h3>`;
+    // SHUFFLER LOGIC
+    // Player before starting predictor
+    let shufflerIndex = startingPlayerIndex - 1;
+
+    if (shufflerIndex < 0) {
+        shufflerIndex = players.length - 1;
     }
+
+    const shuffler = players[shufflerIndex];
+
+    document.getElementById("turnText").innerHTML = `
+        <h3>${actualPlayer}'s Turn</h3>
+
+        <p>
+            🃏 Shuffler:
+            <strong>${shuffler}</strong>
+        </p>
+
+        <p>
+            🎯 First Predictor:
+            <strong>${players[startingPlayerIndex]}</strong>
+        </p>
+    `;
+}
 
     function submitValue() {
 
@@ -381,7 +403,7 @@
 
         roundCell.innerHTML = `
             <strong>${rounds[currentRoundIndex]}</strong><br>
-            Predictions
+            
         `;
 
         row.appendChild(roundCell);
