@@ -148,11 +148,6 @@
             transition: background 0.2s ease, color 0.2s ease;
         }
 
-        th.leader-col {
-            background: var(--gold);
-            color: #17140a;
-        }
-
         .hidden {
             display: none !important;
         }
@@ -323,8 +318,37 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            width: 108px;
+            width: 128px;
             text-align: center;
+        }
+
+        .iconRow {
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .predBadge {
+            position: absolute;
+            right: calc(100% + 6px);
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 10px;
+            line-height: 1.2;
+            color: var(--muted);
+            background: var(--panel-alt);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            padding: 3px 6px;
+            white-space: nowrap;
+        }
+
+        .predBadge strong {
+            display: block;
+            font-family: var(--font-mono);
+            font-size: 13px;
+            color: var(--gold);
         }
 
         .playerNode .countVal {
@@ -480,7 +504,11 @@
                 max-width: 100%;
             }
             .playerNode {
-                width: 82px;
+                width: 96px;
+            }
+            .predBadge {
+                font-size: 9px;
+                padding: 2px 4px;
             }
             .avatarBtn {
                 width: 46px;
@@ -506,7 +534,7 @@
         <div id="homeCard" class="card home-card">
             <div class="checker-strip"></div>
             <h1>🏁 Racing Scoreboard</h1>
-            <p class="tagline">Predict it. Nail it. Bank the points.</p>
+            <p class="tagline">made by afiq handsome.</p>
             <div class="home-actions">
                 <button class="primary-btn" onclick="goNewGame()">New Game</button>
                 <button class="secondary-btn" id="resumeBtn" onclick="resumeGame()" disabled>Resume Game</button>
@@ -517,13 +545,13 @@
         <div id="setupCard" class="card hidden">
 
             <div id="playerCountSection">
-                <h3>How many players? (2-7)</h3>
+                <h3>brapa urg? (2-7)</h3>
                 <input type="number" id="playerCount" min="2" max="7">
                 <button class="primary-btn" onclick="setupNames()">Continue</button>
             </div>
 
             <div id="nameSection" class="hidden">
-                <h3>Enter Player Names</h3>
+                <h3>buat nama kamu</h3>
                 <div id="nameInputs"></div>
                 <button class="primary-btn" onclick="startGame()">Start Game</button>
             </div>
@@ -563,7 +591,7 @@
         </div>
 
         <div id="endCard" class="card hidden">
-            <h1>🏆 Game Finished</h1>
+            <h1>🏆 abisss</h1>
             <div id="winnerText"></div>
 
             <div id="statsGrid" class="stats-grid"></div>
@@ -700,7 +728,6 @@
 
         setupTable();
         roundLog.forEach(entry => upsertTableRow(entry));
-        updateLeaderHighlight();
         updateUI();
     }
 
@@ -869,11 +896,18 @@
 
             const val = store[player] || 0;
 
+            const predBadgeHtml = phase === "actual"
+                ? `<div class="predBadge">Pred<strong>${predictions[player] || 0}</strong></div>`
+                : "";
+
             node.innerHTML = `
                 <div class="countVal" id="count-${i}">${val}</div>
                 <div class="countLabel">${phase === "prediction" ? "predicted" : "actual"}</div>
                 <div class="pname">${player}</div>
-                <button class="avatarBtn" onclick="changeCount(${i}, 1)">${AVATAR_SVG}</button>
+                <div class="iconRow">
+                    ${predBadgeHtml}
+                    <button class="avatarBtn" onclick="changeCount(${i}, 1)">${AVATAR_SVG}</button>
+                </div>
                 <button class="minusBtn" onclick="changeCount(${i}, -1)">−1</button>
             `;
 
@@ -1063,26 +1097,6 @@
         });
     }
 
-    function updateLeaderHighlight() {
-
-        const ths = document.querySelectorAll("#tableHead th");
-
-        let maxScore = -Infinity;
-        let leaderIdx = -1;
-
-        players.forEach((p, i) => {
-            if (totalScores[p] > maxScore) {
-                maxScore = totalScores[p];
-                leaderIdx = i;
-            }
-        });
-
-        ths.forEach((th, idx) => {
-            if (idx === 0) return;
-            th.classList.toggle("leader-col", (idx - 1) === leaderIdx);
-        });
-    }
-
     function finishRound() {
 
         const roundIndex = currentRoundIndex;
@@ -1111,7 +1125,6 @@
         logEntry.runningTotals = { ...totalScores };
 
         upsertTableRow(logEntry);
-        updateLeaderHighlight();
 
         currentRoundIndex++;
 
