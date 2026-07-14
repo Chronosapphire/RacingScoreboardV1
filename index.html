@@ -4,25 +4,45 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Racing Card Game Scoreboard</title>
+    <title>Racing Scoreboard</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;600;700&family=Inter:wght@400;500;600&family=Share+Tech+Mono&display=swap" rel="stylesheet">
 
     <style>
+        :root {
+            --bg: #101114;
+            --panel: #1a1c22;
+            --panel-alt: #22252c;
+            --border: #2c2f37;
+            --text: #f2f2f0;
+            --muted: #9aa0a6;
+            --red: #e63946;
+            --green: #2ec4b6;
+            --gold: #f4a300;
+
+            --font-display: 'Oswald', sans-serif;
+            --font-body: 'Inter', sans-serif;
+            --font-mono: 'Share Tech Mono', monospace;
+        }
+
         * {
             box-sizing: border-box;
-            font-family: Arial, sans-serif;
         }
 
         body {
             margin: 0;
             padding: 20px;
-            background: #121212;
-            color: white;
+            background: var(--bg);
+            color: var(--text);
+            font-family: var(--font-body);
         }
 
-        h1,
-        h2,
-        h3 {
+        h1, h2, h3 {
             margin-top: 0;
+            font-family: var(--font-display);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
 
         .container {
@@ -31,32 +51,77 @@
         }
 
         .card {
-            background: #1e1e1e;
-            padding: 20px;
+            background: var(--panel);
+            border: 1px solid var(--border);
+            padding: 24px;
             border-radius: 14px;
             margin-bottom: 20px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.4);
+            box-shadow: 0 4px 18px rgba(0, 0, 0, 0.45);
         }
 
-        button {
-            padding: 12px 20px;
-            border: none;
-            border-radius: 10px;
-            cursor: pointer;
-            background: #4caf50;
-            color: white;
-            font-weight: bold;
-            margin-top: 10px;
-        }
-
-        button:hover {
+        .checker-strip {
+            height: 14px;
+            border-radius: 4px;
+            margin-bottom: 20px;
+            background: repeating-conic-gradient(#0b0b0c 0% 25%, #eceae4 0% 50%) 0 0 / 18px 18px;
             opacity: 0.9;
         }
 
+        button {
+            font-family: var(--font-body);
+            padding: 12px 22px;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 15px;
+        }
+
+        .primary-btn {
+            background: var(--green);
+            color: #0a1210;
+        }
+
+        .primary-btn:hover {
+            opacity: 0.9;
+        }
+
+        .secondary-btn {
+            background: var(--panel-alt);
+            color: var(--text);
+            border: 1px solid var(--border);
+            margin-left: 10px;
+        }
+
+        .secondary-btn:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+
+        .secondary-btn:not(:disabled):hover {
+            border-color: var(--gold);
+        }
+
+        .ghost-btn {
+            background: transparent;
+            border: 1px solid var(--border);
+            color: var(--muted);
+            padding: 8px 14px;
+            font-size: 13px;
+        }
+
+        .ghost-btn:hover {
+            color: var(--text);
+            border-color: var(--muted);
+        }
+
         input {
+            font-family: var(--font-body);
             padding: 10px;
             border-radius: 8px;
-            border: none;
+            border: 1px solid var(--border);
+            background: var(--panel-alt);
+            color: var(--text);
             width: 100%;
             margin-top: 8px;
             margin-bottom: 12px;
@@ -66,42 +131,370 @@
             width: 100%;
             border-collapse: collapse;
             margin-top: 20px;
+            font-family: var(--font-mono);
+            font-size: 14px;
         }
 
-        th,
-        td {
-            border: 1px solid #333;
-            padding: 12px;
+        th, td {
+            border: 1px solid var(--border);
+            padding: 10px;
             text-align: center;
         }
 
         th {
-            background: #2e2e2e;
+            background: var(--panel-alt);
+            font-family: var(--font-body);
+            font-weight: 600;
+            transition: background 0.2s ease, color 0.2s ease;
+        }
+
+        th.leader-col {
+            background: var(--gold);
+            color: #17140a;
         }
 
         .hidden {
-            display: none;
+            display: none !important;
         }
 
         .highlight {
-            color: #4caf50;
+            color: var(--green);
             font-weight: bold;
         }
 
         .phase {
-            font-size: 20px;
-            margin-bottom: 15px;
-            color: #ffcc00;
-        }
-
-        .scoreboard {
-            margin-top: 20px;
+            font-size: 15px;
+            margin-bottom: 4px;
+            color: var(--muted);
+            font-family: var(--font-body);
+            text-transform: none;
+            letter-spacing: normal;
         }
 
         .winner {
-            font-size: 28px;
-            color: #4caf50;
+            font-size: 24px;
+            color: var(--gold);
             font-weight: bold;
+            font-family: var(--font-display);
+            text-align: center;
+            margin-bottom: 16px;
+        }
+
+        /* ---- Home screen ---- */
+        .home-card {
+            text-align: center;
+        }
+
+        .tagline {
+            color: var(--muted);
+            margin-bottom: 22px;
+        }
+
+        .home-actions {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .resume-info {
+            margin-top: 14px;
+            font-size: 13px;
+            color: var(--muted);
+            font-family: var(--font-mono);
+        }
+
+        /* ---- Round info panel ---- */
+        .topRow {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .roundInfo {
+            display: flex;
+            gap: 24px;
+            flex-wrap: wrap;
+            background: var(--panel-alt);
+            border-radius: 10px;
+            padding: 12px 16px;
+            margin-bottom: 10px;
+        }
+
+        .roundInfo div {
+            font-size: 13px;
+            color: var(--muted);
+        }
+
+        .roundInfo strong {
+            color: var(--gold);
+        }
+
+        /* ---- Status bar (running total + lock message) ---- */
+        .statusBar {
+            text-align: center;
+            margin-bottom: 6px;
+        }
+
+        .running-total {
+            display: inline-block;
+            font-family: var(--font-mono);
+            font-size: 15px;
+            padding: 6px 16px;
+            border-radius: 20px;
+            background: var(--panel-alt);
+            border: 1px solid var(--border);
+            color: var(--green);
+            transition: all 0.15s ease;
+        }
+
+        .running-total.danger {
+            color: var(--red);
+            border-color: var(--red);
+            background: rgba(230, 57, 70, 0.12);
+        }
+
+        .lock-msg {
+            margin-top: 8px;
+            font-size: 13px;
+            color: var(--red);
+        }
+
+        /* ---- Circle layout ---- */
+        .circleWrap {
+            position: relative;
+            width: 100%;
+            max-width: 600px;
+            aspect-ratio: 1 / 1;
+            margin: 20px auto;
+        }
+
+        .confirmBtn {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 140px;
+            height: 140px;
+            border-radius: 50%;
+            background: var(--green);
+            color: #08130f;
+            font-family: var(--font-display);
+            font-size: 19px;
+            font-weight: 700;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            border: 4px solid #6fe0d3;
+            cursor: pointer;
+            box-shadow: 0 0 18px rgba(46, 196, 182, 0.5);
+            transition: transform 0.12s ease, box-shadow 0.15s ease, background 0.15s ease, border-color 0.15s ease;
+        }
+
+        .confirmBtn:hover {
+            transform: translate(-50%, -50%) scale(1.05);
+        }
+
+        .confirmBtn:active {
+            transform: translate(-50%, -50%) scale(0.97);
+        }
+
+        .confirmBtn.locked {
+            background: var(--red);
+            border-color: #ff9a94;
+            box-shadow: 0 0 20px rgba(230, 57, 70, 0.6);
+        }
+
+        @keyframes shake {
+            10%, 90% { transform: translate(-50%, -50%) translateX(-3px); }
+            20%, 80% { transform: translate(-50%, -50%) translateX(4px); }
+            30%, 50%, 70% { transform: translate(-50%, -50%) translateX(-7px); }
+            40%, 60% { transform: translate(-50%, -50%) translateX(7px); }
+        }
+
+        .confirmBtn.shake {
+            animation: shake 0.4s;
+        }
+
+        .playerNode {
+            position: absolute;
+            transform: translate(-50%, -50%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 108px;
+            text-align: center;
+        }
+
+        .playerNode .countVal {
+            font-family: var(--font-mono);
+            font-size: 22px;
+            font-weight: bold;
+            color: var(--driver-color, var(--gold));
+            line-height: 1.1;
+        }
+
+        .playerNode .countLabel {
+            font-size: 10px;
+            color: var(--muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .playerNode .pname {
+            font-size: 13px;
+            font-weight: 600;
+            margin: 2px 0 6px 0;
+            color: var(--text);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 100px;
+        }
+
+        .avatarBtn {
+            width: 58px;
+            height: 58px;
+            border-radius: 50%;
+            background: var(--panel-alt);
+            border: 3px solid var(--driver-color, var(--green));
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.1s ease, background 0.1s ease;
+            padding: 0;
+        }
+
+        .avatarBtn svg {
+            width: 32px;
+            height: 32px;
+            fill: var(--driver-color, var(--green));
+        }
+
+        .avatarBtn:hover {
+            background: #2b2f38;
+            transform: scale(1.08);
+        }
+
+        .avatarBtn:active {
+            transform: scale(0.95);
+        }
+
+        .minusBtn {
+            margin-top: 6px;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: rgba(230, 57, 70, 0.12);
+            border: 2px solid var(--red);
+            color: #ff9a94;
+            font-weight: bold;
+            font-size: 15px;
+            cursor: pointer;
+            padding: 0;
+            line-height: 1;
+        }
+
+        .minusBtn:hover {
+            opacity: 0.85;
+        }
+
+        /* ---- End screen ---- */
+        .podium {
+            display: flex;
+            justify-content: center;
+            gap: 14px;
+            margin-bottom: 24px;
+            flex-wrap: wrap;
+        }
+
+        .podium-item {
+            background: var(--panel-alt);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 14px 20px;
+            text-align: center;
+            min-width: 110px;
+        }
+
+        .podium-item.place-1 {
+            border-color: var(--gold);
+            transform: translateY(-6px);
+        }
+
+        .medal {
+            font-size: 26px;
+        }
+
+        .podium-name {
+            font-weight: 600;
+            margin-top: 4px;
+        }
+
+        .podium-score {
+            font-family: var(--font-mono);
+            color: var(--green);
+            margin-top: 2px;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .stat-card {
+            background: var(--panel-alt);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 14px;
+            text-align: center;
+        }
+
+        .stat-label {
+            font-size: 12px;
+            color: var(--muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 6px;
+        }
+
+        .stat-value {
+            font-family: var(--font-display);
+            font-size: 18px;
+            color: var(--text);
+        }
+
+        .stat-sub {
+            font-family: var(--font-mono);
+            font-size: 12px;
+            color: var(--gold);
+            margin-top: 4px;
+        }
+
+        @media (max-width: 640px) {
+            .circleWrap {
+                max-width: 100%;
+            }
+            .playerNode {
+                width: 82px;
+            }
+            .avatarBtn {
+                width: 46px;
+                height: 46px;
+            }
+            .avatarBtn svg {
+                width: 24px;
+                height: 24px;
+            }
+            .confirmBtn {
+                width: 98px;
+                height: 98px;
+                font-size: 14px;
+            }
         }
     </style>
 </head>
@@ -110,48 +503,70 @@
 
     <div class="container">
 
-        <div id="setupCard" class="card">
+        <div id="homeCard" class="card home-card">
+            <div class="checker-strip"></div>
             <h1>🏁 Racing Scoreboard</h1>
+            <p class="tagline">Predict it. Nail it. Bank the points.</p>
+            <div class="home-actions">
+                <button class="primary-btn" onclick="goNewGame()">New Game</button>
+                <button class="secondary-btn" id="resumeBtn" onclick="resumeGame()" disabled>Resume Game</button>
+            </div>
+            <div id="resumeInfo" class="resume-info hidden"></div>
+        </div>
+
+        <div id="setupCard" class="card hidden">
 
             <div id="playerCountSection">
                 <h3>How many players? (2-7)</h3>
                 <input type="number" id="playerCount" min="2" max="7">
-                <button onclick="setupNames()">Continue</button>
+                <button class="primary-btn" onclick="setupNames()">Continue</button>
             </div>
 
             <div id="nameSection" class="hidden">
                 <h3>Enter Player Names</h3>
                 <div id="nameInputs"></div>
-                <button onclick="startGame()">Start Game</button>
+                <button class="primary-btn" onclick="startGame()">Start Game</button>
             </div>
         </div>
 
         <div id="gameCard" class="card hidden">
 
-            <h2 id="roundTitle"></h2>
-            <div class="phase" id="phaseText"></div>
-
-            <div id="turnText"></div>
-
-            <input type="number" id="valueInput" min="0">
-            <button onclick="submitValue()">Submit</button>
-
-            <div class="scoreboard">
-                <table id="scoreTable">
-                    <thead>
-                        <tr id="tableHead">
-                            <th>Round</th>
-                        </tr>
-                    </thead>
-                    <tbody id="tableBody"></tbody>
-                </table>
+            <div class="topRow">
+                <div>
+                    <h2 id="roundTitle"></h2>
+                    <div class="phase" id="phaseText"></div>
+                </div>
+                <button class="ghost-btn" onclick="saveAndExit()">⏸ Save &amp; Exit</button>
             </div>
+
+            <div class="roundInfo" id="roundInfo"></div>
+
+            <div class="statusBar">
+                <div id="runningTotalBar" class="running-total"></div>
+                <div id="lockMsg" class="lock-msg hidden"></div>
+            </div>
+
+            <div class="circleWrap" id="circleWrap">
+                <button class="confirmBtn" id="confirmBtn" onclick="confirmPhase()">Confirm</button>
+                <!-- player nodes injected here -->
+            </div>
+
+            <table id="scoreTable">
+                <thead>
+                    <tr id="tableHead">
+                        <th>Round</th>
+                    </tr>
+                </thead>
+                <tbody id="tableBody"></tbody>
+            </table>
 
         </div>
 
         <div id="endCard" class="card hidden">
             <h1>🏆 Game Finished</h1>
             <div id="winnerText"></div>
+
+            <div id="statsGrid" class="stats-grid"></div>
 
             <table id="finalTable">
                 <thead>
@@ -162,6 +577,10 @@
                 </thead>
                 <tbody id="finalBody"></tbody>
             </table>
+
+            <div style="text-align:center; margin-top: 18px;">
+                <button class="primary-btn" onclick="window.location.reload()">Play Again</button>
+            </div>
         </div>
 
     </div>
@@ -174,8 +593,12 @@
     let actuals = {};
 
     let currentRoundIndex = 0;
-    let currentPlayerIndex = 0;
     let phase = "prediction";
+    let startingPlayerIndex = 0;
+
+    let roundLog = [];      // [{roundIndex, predictions, actuals|null, points|null, runningTotals|null}]
+    let hitsCount = {};     // player -> number of exact hits
+    let biggestRound = null; // {player, round, points}
 
     const rounds = [
         1, 2, 3, 4, 5, 6,
@@ -185,7 +608,110 @@
         6, 5, 4, 3, 2, 1
     ];
 
-    let startingPlayerIndex = 0;
+    const DRIVER_COLORS = ['#e63946', '#2ec4b6', '#f4a300', '#4361ee', '#b5179e', '#ff8500', '#588157'];
+
+    const SAVE_KEY = "racingScoreboardSave_v1";
+
+    const AVATAR_SVG = `
+        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="12" cy="8" r="4"></circle>
+            <path d="M4 20c0-4.4 3.6-7 8-7s8 2.6 8 7v1H4v-1z"></path>
+        </svg>
+    `;
+
+    // ---------------- Persistence ----------------
+
+    function saveState() {
+        const state = {
+            players, totalScores, predictions, actuals,
+            currentRoundIndex, phase, startingPlayerIndex,
+            roundLog, hitsCount, biggestRound
+        };
+        try {
+            localStorage.setItem(SAVE_KEY, JSON.stringify(state));
+        } catch (e) {
+            console.warn("Could not save game state", e);
+        }
+    }
+
+    function loadState() {
+        try {
+            const raw = localStorage.getItem(SAVE_KEY);
+            return raw ? JSON.parse(raw) : null;
+        } catch (e) {
+            return null;
+        }
+    }
+
+    function clearState() {
+        localStorage.removeItem(SAVE_KEY);
+    }
+
+    function initHome() {
+        const saved = loadState();
+        const resumeBtn = document.getElementById("resumeBtn");
+        const info = document.getElementById("resumeInfo");
+
+        if (saved && saved.players && saved.players.length) {
+            resumeBtn.disabled = false;
+            info.classList.remove("hidden");
+            info.innerText =
+                `${saved.players.length} players • Round ${rounds[saved.currentRoundIndex]} • ` +
+                `${saved.phase === "prediction" ? "Prediction" : "Actual"} phase`;
+        } else {
+            resumeBtn.disabled = true;
+            info.classList.add("hidden");
+        }
+    }
+
+    function goNewGame() {
+        const saved = loadState();
+
+        if (saved && saved.players && saved.players.length) {
+            const ok = confirm("Starting a new game will overwrite your saved game. Continue?");
+            if (!ok) return;
+            clearState();
+        }
+
+        document.getElementById("playerCount").value = "";
+        document.getElementById("nameSection").classList.add("hidden");
+
+        document.getElementById("homeCard").classList.add("hidden");
+        document.getElementById("setupCard").classList.remove("hidden");
+    }
+
+    function resumeGame() {
+        const saved = loadState();
+        if (!saved) return;
+
+        players = saved.players;
+        totalScores = saved.totalScores;
+        predictions = saved.predictions;
+        actuals = saved.actuals;
+        currentRoundIndex = saved.currentRoundIndex;
+        phase = saved.phase;
+        startingPlayerIndex = saved.startingPlayerIndex;
+        roundLog = saved.roundLog || [];
+        hitsCount = saved.hitsCount || {};
+        biggestRound = saved.biggestRound || null;
+
+        document.getElementById("homeCard").classList.add("hidden");
+        document.getElementById("gameCard").classList.remove("hidden");
+
+        setupTable();
+        roundLog.forEach(entry => upsertTableRow(entry));
+        updateLeaderHighlight();
+        updateUI();
+    }
+
+    function saveAndExit() {
+        saveState();
+        document.getElementById("gameCard").classList.add("hidden");
+        document.getElementById("homeCard").classList.remove("hidden");
+        initHome();
+    }
+
+    // ---------------- Setup ----------------
 
     function setupNames() {
 
@@ -214,6 +740,11 @@
         const count = parseInt(document.getElementById("playerCount").value);
 
         players = [];
+        totalScores = {};
+        roundLog = [];
+        hitsCount = {};
+        biggestRound = null;
+        currentRoundIndex = 0;
 
         for (let i = 0; i < count; i++) {
 
@@ -240,24 +771,30 @@
     function setupTable() {
 
         const head = document.getElementById("tableHead");
+        head.innerHTML = "<th>Round</th>";
+        document.getElementById("tableBody").innerHTML = "";
 
         players.forEach(player => {
-
             const th = document.createElement("th");
             th.innerText = player;
-
             head.appendChild(th);
         });
     }
+
+    // ---------------- Round flow ----------------
 
     function startRound() {
 
         predictions = {};
         actuals = {};
 
-        currentPlayerIndex = 0;
+        players.forEach(p => {
+            predictions[p] = 0;
+        });
+
         phase = "prediction";
 
+        saveState();
         updateUI();
     }
 
@@ -272,181 +809,309 @@
         return 7;
     }
 
-    function updateUI() {
-
-    const roundName = rounds[currentRoundIndex];
-
-    document.getElementById("roundTitle").innerText =
-        `Round ${roundName}`;
-
-    document.getElementById("phaseText").innerText =
-        phase === "prediction"
-            ? "Prediction Phase"
-            : "Actual Result Phase";
-
-    // CURRENT PLAYER
-    const actualPlayer =
-        players[
-        (startingPlayerIndex + currentPlayerIndex)
-        % players.length
-        ];
-
-    // SHUFFLER LOGIC
-    // Player before starting predictor
-    let shufflerIndex = startingPlayerIndex - 1;
-
-    if (shufflerIndex < 0) {
-        shufflerIndex = players.length - 1;
+    function sumOf(obj) {
+        return Object.values(obj).reduce((a, b) => a + b, 0);
     }
 
-    const shuffler = players[shufflerIndex];
+    function updateUI() {
 
-    document.getElementById("turnText").innerHTML = `
-        <h3>${actualPlayer}'s Turn</h3>
+        const roundName = rounds[currentRoundIndex];
 
-        <p>
-            🃏 Shuffler:
-            <strong>${shuffler}</strong>
-        </p>
+        document.getElementById("roundTitle").innerText =
+            `Round ${roundName}`;
 
-        <p>
-            🎯 First Predictor:
-            <strong>${players[startingPlayerIndex]}</strong>
-        </p>
-    `;
-}
+        document.getElementById("phaseText").innerText =
+            phase === "prediction"
+                ? "Prediction Phase — tap to set each player's guess"
+                : "Actual Result Phase — tap to set each player's real count";
 
-    function submitValue() {
+        let shufflerIndex = startingPlayerIndex - 1;
 
-        const value = parseInt(document.getElementById("valueInput").value);
-
-        if (isNaN(value) || value < 0) {
-            alert("Enter valid number.");
-            return;
+        if (shufflerIndex < 0) {
+            shufflerIndex = players.length - 1;
         }
 
-        const player =
-            players[
-            (startingPlayerIndex + currentPlayerIndex)
-            % players.length
-            ];
+        const shuffler = players[shufflerIndex];
+
+        document.getElementById("roundInfo").innerHTML = `
+            <div>🃏 Shuffler: <strong>${shuffler}</strong></div>
+            <div>🎯 First Predictor: <strong>${players[startingPlayerIndex]}</strong></div>
+        `;
+
+        renderCircle();
+        updateRunningTotal();
+        updateLockState();
+    }
+
+    function renderCircle() {
+
+        const wrap = document.getElementById("circleWrap");
+
+        wrap.querySelectorAll(".playerNode").forEach(n => n.remove());
+
+        const size = wrap.clientWidth || 600;
+        const center = size / 2;
+        const radius = size * 0.38;
+
+        const store = phase === "prediction" ? predictions : actuals;
+
+        players.forEach((player, i) => {
+
+            const angle = (-90 + (360 / players.length) * i) * (Math.PI / 180);
+            const x = center + radius * Math.cos(angle);
+            const y = center + radius * Math.sin(angle);
+
+            const node = document.createElement("div");
+            node.className = "playerNode";
+            node.style.left = `${x}px`;
+            node.style.top = `${y}px`;
+            node.style.setProperty("--driver-color", DRIVER_COLORS[i % DRIVER_COLORS.length]);
+
+            const val = store[player] || 0;
+
+            node.innerHTML = `
+                <div class="countVal" id="count-${i}">${val}</div>
+                <div class="countLabel">${phase === "prediction" ? "predicted" : "actual"}</div>
+                <div class="pname">${player}</div>
+                <button class="avatarBtn" onclick="changeCount(${i}, 1)">${AVATAR_SVG}</button>
+                <button class="minusBtn" onclick="changeCount(${i}, -1)">−1</button>
+            `;
+
+            wrap.appendChild(node);
+        });
+    }
+
+    function changeCount(index, delta) {
+
+        const player = players[index];
+        const roundValue = getCurrentRoundValue();
+        const store = phase === "prediction" ? predictions : actuals;
+
+        let val = (store[player] || 0) + delta;
+
+        if (val < 0) val = 0;
+        if (val > roundValue) val = roundValue;
+
+        store[player] = val;
+
+        document.getElementById(`count-${index}`).innerText = val;
+
+        updateRunningTotal();
+        updateLockState();
+        saveState();
+    }
+
+    function updateRunningTotal() {
+
+        const store = phase === "prediction" ? predictions : actuals;
+        const sum = sumOf(store);
+        const roundValue = getCurrentRoundValue();
+        const bar = document.getElementById("runningTotalBar");
+
+        bar.innerText = phase === "prediction"
+            ? `Running total: ${sum} (can't equal ${roundValue})`
+            : `Running total: ${sum}`;
+
+        bar.classList.toggle("danger", phase === "prediction" && sum === roundValue);
+    }
+
+    function updateLockState() {
+
+        const btn = document.getElementById("confirmBtn");
+        const msg = document.getElementById("lockMsg");
+        const roundValue = getCurrentRoundValue();
+
+        if (phase === "prediction") {
+
+            const locked = sumOf(predictions) === roundValue;
+
+            btn.classList.toggle("locked", locked);
+            msg.classList.toggle("hidden", !locked);
+            msg.innerText = `Total can't equal ${roundValue}. Adjust a prediction before confirming.`;
+
+        } else {
+
+            btn.classList.remove("locked");
+            msg.classList.add("hidden");
+        }
+    }
+
+    // ---------------- Sound / haptic feedback ----------------
+
+    let audioCtx;
+
+    function playBuzz() {
+        try {
+            audioCtx = audioCtx || new (window.AudioContext || window.webkitAudioContext)();
+
+            const now = audioCtx.currentTime;
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+
+            osc.type = "sawtooth";
+            osc.frequency.setValueAtTime(190, now);
+            osc.frequency.exponentialRampToValueAtTime(65, now + 0.35);
+
+            gain.gain.setValueAtTime(0.28, now);
+            gain.gain.exponentialRampToValueAtTime(0.001, now + 0.35);
+
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+
+            osc.start(now);
+            osc.stop(now + 0.35);
+        } catch (e) {
+            // Web Audio not available — fail silently
+        }
+    }
+
+    function triggerLockedFeedback() {
+
+        playBuzz();
+
+        if (navigator.vibrate) {
+            navigator.vibrate([80, 40, 80, 40, 120]);
+        }
+
+        const btn = document.getElementById("confirmBtn");
+        btn.classList.remove("shake");
+        void btn.offsetWidth; // restart animation
+        btn.classList.add("shake");
+    }
+
+    // ---------------- Confirm / scoring ----------------
+
+    function calculatePoints(prediction) {
+        return 10 + (prediction * 2);
+    }
+
+    function confirmPhase() {
 
         const roundValue = getCurrentRoundValue();
 
         if (phase === "prediction") {
 
-            // LAST PLAYER RULE
-            if (currentPlayerIndex === players.length - 1) {
+            const sum = sumOf(predictions);
 
-                let sum = 0;
-
-                for (let p in predictions) {
-                    sum += predictions[p];
-                }
-
-                if (sum + value === roundValue) {
-
-                    alert(
-                        `Total predictions cannot equal ${roundValue}`
-                    );
-
-                    return;
-                }
+            if (sum === roundValue) {
+                triggerLockedFeedback();
+                return;
             }
 
-            predictions[player] = value;
+            const logEntry = {
+                roundIndex: currentRoundIndex,
+                predictions: { ...predictions },
+                actuals: null,
+                points: null,
+                runningTotals: null
+            };
 
-        } else {
+            roundLog.push(logEntry);
+            upsertTableRow(logEntry);
 
-            actuals[player] = value;
-        }
+            phase = "actual";
 
-        document.getElementById("valueInput").value = "";
+            players.forEach(p => {
+                actuals[p] = 0;
+            });
 
-        currentPlayerIndex++;
-
-        if (currentPlayerIndex >= players.length) {
-
-            if (phase === "prediction") {
-
-                // SHOW PREDICTIONS IMMEDIATELY
-                createPredictionRow();
-
-                phase = "actual";
-                currentPlayerIndex = 0;
-
-                updateUI();
-
-            } else {
-
-                finishRound();
-            }
-
-        } else {
-
+            saveState();
             updateUI();
+
+        } else {
+
+            finishRound();
         }
     }
 
-    function calculatePoints(prediction) {
+    function upsertTableRow(logEntry) {
 
-        return 10 + (prediction * 2);
+        let row = document.getElementById(`round-row-${logEntry.roundIndex}`);
+
+        if (!row) {
+            row = document.createElement("tr");
+            row.id = `round-row-${logEntry.roundIndex}`;
+
+            const roundCell = document.createElement("td");
+            roundCell.innerHTML = `<strong>${rounds[logEntry.roundIndex]}</strong>`;
+            row.appendChild(roundCell);
+
+            players.forEach(() => row.appendChild(document.createElement("td")));
+
+            document.getElementById("tableBody").appendChild(row);
+        }
+
+        const cells = row.querySelectorAll("td");
+
+        players.forEach((player, idx) => {
+
+            const cell = cells[idx + 1];
+
+            if (logEntry.actuals) {
+                cell.innerHTML = `
+                    Pred: ${logEntry.predictions[player]}<br>
+                    Actual: ${logEntry.actuals[player]}<br>
+                    <span class="highlight">+${logEntry.points[player]}</span><br>
+                    Total: ${logEntry.runningTotals[player]}
+                `;
+            } else {
+                cell.innerHTML = `
+                    Pred: <strong>${logEntry.predictions[player]}</strong><br>
+                    Actual: ?
+                `;
+            }
+        });
     }
 
-    function createPredictionRow() {
+    function updateLeaderHighlight() {
 
-        const row = document.createElement("tr");
+        const ths = document.querySelectorAll("#tableHead th");
 
-        row.id = `round-row-${currentRoundIndex}`;
+        let maxScore = -Infinity;
+        let leaderIdx = -1;
 
-        const roundCell = document.createElement("td");
-
-        roundCell.innerHTML = `
-            <strong>${rounds[currentRoundIndex]}</strong><br>
-            
-        `;
-
-        row.appendChild(roundCell);
-
-        players.forEach(player => {
-
-            const td = document.createElement("td");
-
-            td.innerHTML = `
-                Pred: <strong>${predictions[player]}</strong><br>
-                Actual: ?
-            `;
-
-            row.appendChild(td);
+        players.forEach((p, i) => {
+            if (totalScores[p] > maxScore) {
+                maxScore = totalScores[p];
+                leaderIdx = i;
+            }
         });
 
-        document.getElementById("tableBody").appendChild(row);
+        ths.forEach((th, idx) => {
+            if (idx === 0) return;
+            th.classList.toggle("leader-col", (idx - 1) === leaderIdx);
+        });
     }
 
     function finishRound() {
 
-        const row =
-            document.getElementById(`round-row-${currentRoundIndex}`);
+        const roundIndex = currentRoundIndex;
+        const points = {};
 
-        const cells = row.querySelectorAll("td");
+        players.forEach(player => {
 
-        players.forEach((player, index) => {
-
-            let points = 0;
+            let p = 0;
 
             if (predictions[player] === actuals[player]) {
-                points = calculatePoints(predictions[player]);
+                p = calculatePoints(predictions[player]);
+                hitsCount[player] = (hitsCount[player] || 0) + 1;
             }
 
-            totalScores[player] += points;
+            points[player] = p;
+            totalScores[player] += p;
 
-            cells[index + 1].innerHTML = `
-                Pred: ${predictions[player]}<br>
-                Actual: ${actuals[player]}<br>
-                <span class="highlight">+${points}</span><br>
-                Total: ${totalScores[player]}
-            `;
+            if (p > 0 && (biggestRound === null || p > biggestRound.points)) {
+                biggestRound = { player, round: rounds[roundIndex], points: p };
+            }
         });
+
+        const logEntry = roundLog.find(e => e.roundIndex === roundIndex);
+        logEntry.actuals = { ...actuals };
+        logEntry.points = points;
+        logEntry.runningTotals = { ...totalScores };
+
+        upsertTableRow(logEntry);
+        updateLeaderHighlight();
 
         currentRoundIndex++;
 
@@ -454,47 +1119,93 @@
             (startingPlayerIndex + 1)
             % players.length;
 
+        saveState();
+
         if (currentRoundIndex >= rounds.length) {
-
             endGame();
-
         } else {
-
             startRound();
         }
     }
 
     function endGame() {
 
-        document.getElementById("gameCard")
-            .classList.add("hidden");
+        document.getElementById("gameCard").classList.add("hidden");
+        document.getElementById("endCard").classList.remove("hidden");
 
-        document.getElementById("endCard")
-            .classList.remove("hidden");
+        clearState();
 
         let sorted = [...players].sort(
             (a, b) => totalScores[b] - totalScores[a]
         );
 
-        document.getElementById("winnerText").innerHTML =
-            `<div class="winner">
-                Winner: ${sorted[0]}
-            </div>`;
+        const podiumHtml = sorted.slice(0, 3).map((p, i) => {
+            const medal = ["🥇", "🥈", "🥉"][i];
+            return `
+                <div class="podium-item place-${i + 1}">
+                    <div class="medal">${medal}</div>
+                    <div class="podium-name">${p}</div>
+                    <div class="podium-score">${totalScores[p]} pts</div>
+                </div>
+            `;
+        }).join("");
+
+        document.getElementById("winnerText").innerHTML = `
+            <div class="winner">🏆 ${sorted[0]} wins the race!</div>
+            <div class="podium">${podiumHtml}</div>
+        `;
+
+        let mostAccurate = players[0];
+        let maxHits = -1;
+        let leastAccurate = players[0];
+        let minHits = Infinity;
+
+        players.forEach(p => {
+            const h = hitsCount[p] || 0;
+            if (h > maxHits) { maxHits = h; mostAccurate = p; }
+            if (h < minHits) { minHits = h; leastAccurate = p; }
+        });
+
+        document.getElementById("statsGrid").innerHTML = `
+            <div class="stat-card">
+                <div class="stat-label">🎯 Most Accurate</div>
+                <div class="stat-value">${mostAccurate}</div>
+                <div class="stat-sub">${maxHits} exact call${maxHits === 1 ? "" : "s"}</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">🥄 Wooden Spoon</div>
+                <div class="stat-value">${leastAccurate}</div>
+                <div class="stat-sub">${minHits} exact call${minHits === 1 ? "" : "s"}</div>
+            </div>
+            ${biggestRound ? `
+            <div class="stat-card">
+                <div class="stat-label">💥 Biggest Round</div>
+                <div class="stat-value">${biggestRound.player}</div>
+                <div class="stat-sub">+${biggestRound.points} pts in Round ${biggestRound.round}</div>
+            </div>` : ""}
+        `;
 
         const body = document.getElementById("finalBody");
+        body.innerHTML = "";
 
         sorted.forEach(player => {
-
             const tr = document.createElement("tr");
-
             tr.innerHTML = `
                 <td>${player}</td>
                 <td>${totalScores[player]}</td>
             `;
-
             body.appendChild(tr);
         });
     }
+
+    // Re-lay the circle if the window is resized (so radius stays correct)
+    window.addEventListener("resize", () => {
+        if (!document.getElementById("gameCard").classList.contains("hidden")) {
+            renderCircle();
+        }
+    });
+
+    initHome();
 
 </script>
 
