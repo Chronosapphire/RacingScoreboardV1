@@ -127,10 +127,17 @@
             margin-bottom: 12px;
         }
 
+        .tableScroll {
+            width: 100%;
+            overflow-x: auto;
+            margin-top: 20px;
+            border-radius: 10px;
+            -webkit-overflow-scrolling: touch;
+        }
+
         table {
             width: 100%;
             border-collapse: collapse;
-            margin-top: 20px;
             font-family: var(--font-mono);
             font-size: 14px;
         }
@@ -139,6 +146,7 @@
             border: 1px solid var(--border);
             padding: 10px;
             text-align: center;
+            white-space: nowrap;
         }
 
         th {
@@ -146,6 +154,20 @@
             font-family: var(--font-body);
             font-weight: 600;
             transition: background 0.2s ease, color 0.2s ease;
+        }
+
+        #tableHead th:first-child {
+            position: sticky;
+            left: 0;
+            z-index: 2;
+            background: var(--panel-alt);
+        }
+
+        #tableBody td:first-child {
+            position: sticky;
+            left: 0;
+            z-index: 1;
+            background: var(--panel);
         }
 
         .hidden {
@@ -502,6 +524,7 @@
         @media (max-width: 640px) {
             .circleWrap {
                 max-width: 100%;
+                aspect-ratio: 4 / 5;
             }
             .playerNode {
                 width: 96px;
@@ -522,6 +545,56 @@
                 width: 98px;
                 height: 98px;
                 font-size: 14px;
+            }
+        }
+
+        @media (max-width: 400px) {
+            .card {
+                padding: 16px;
+            }
+            .circleWrap {
+                aspect-ratio: 3 / 4;
+                margin: 14px auto;
+            }
+            .playerNode {
+                width: 76px;
+            }
+            .playerNode .countVal {
+                font-size: 16px;
+            }
+            .playerNode .pname {
+                font-size: 11px;
+                max-width: 74px;
+            }
+            .predBadge {
+                font-size: 8px;
+                padding: 2px 3px;
+            }
+            .predBadge strong {
+                font-size: 10px;
+            }
+            .avatarBtn {
+                width: 38px;
+                height: 38px;
+            }
+            .avatarBtn svg {
+                width: 20px;
+                height: 20px;
+            }
+            .minusBtn {
+                width: 26px;
+                height: 26px;
+                font-size: 12px;
+            }
+            .confirmBtn {
+                width: 98px;
+                height: 98px;
+                font-size: 11px;
+                border-width: 3px;
+            }
+            .running-total {
+                font-size: 12px;
+                padding: 5px 12px;
             }
         }
     </style>
@@ -579,14 +652,16 @@
                 <!-- player nodes injected here -->
             </div>
 
-            <table id="scoreTable">
-                <thead>
-                    <tr id="tableHead">
-                        <th>Round</th>
-                    </tr>
-                </thead>
-                <tbody id="tableBody"></tbody>
-            </table>
+            <div class="tableScroll">
+                <table id="scoreTable">
+                    <thead>
+                        <tr id="tableHead">
+                            <th>Round</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tableBody"></tbody>
+                </table>
+            </div>
 
         </div>
 
@@ -876,17 +951,20 @@
 
         wrap.querySelectorAll(".playerNode").forEach(n => n.remove());
 
-        const size = wrap.clientWidth || 600;
-        const center = size / 2;
-        const radius = size * 0.38;
+        const w = wrap.clientWidth || 600;
+        const h = wrap.clientHeight || 600;
+        const centerX = w / 2;
+        const centerY = h / 2;
+        const radiusX = w * 0.38;
+        const radiusY = h * 0.38;
 
         const store = phase === "prediction" ? predictions : actuals;
 
         players.forEach((player, i) => {
 
             const angle = (-90 + (360 / players.length) * i) * (Math.PI / 180);
-            const x = center + radius * Math.cos(angle);
-            const y = center + radius * Math.sin(angle);
+            const x = centerX + radiusX * Math.cos(angle);
+            const y = centerY + radiusY * Math.sin(angle);
 
             const node = document.createElement("div");
             node.className = "playerNode";
