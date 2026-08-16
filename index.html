@@ -117,6 +117,22 @@
             border-color: var(--muted);
         }
 
+        .ghost-btn:disabled {
+            opacity: 0.35;
+            cursor: not-allowed;
+        }
+
+        .ghost-btn:disabled:hover {
+            color: var(--muted);
+            border-color: var(--border);
+        }
+
+        .topRowActions {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
         input {
             font-family: var(--font-body);
             padding: 10px;
@@ -665,7 +681,10 @@
                     <h2 id="roundTitle"></h2>
                     <div class="phase" id="phaseText"></div>
                 </div>
-                <button class="ghost-btn" onclick="saveAndExit()">⏸ Save &amp; Exit</button>
+                <div class="topRowActions">
+                    <button class="ghost-btn" id="undoBtn" onclick="undoLastConfirm()" disabled>↩ Undo Last Confirm</button>
+                    <button class="ghost-btn" onclick="saveAndExit()">⏸ Save &amp; Exit</button>
+                </div>
             </div>
 
             <div class="roundInfo" id="roundInfo"></div>
@@ -736,6 +755,7 @@
     let roundLog = [];      // [{roundIndex, predictions, actuals|null, points|null, runningTotals|null}]
     let hitsCount = {};     // player -> number of exact hits
     let biggestRound = null; // {player, round, points}
+    let lastConfirmSnapshot = null; // full state captured right before the most recent confirm
 
     const rounds = [
         1, 2, 3, 4, 5, 6,
@@ -788,6 +808,55 @@
         localStorage.removeItem(SAVE_KEY);
     }
 
+    // ---------------- Undo last confirm ----------------
+
+    function snapshotState() {
+        return JSON.parse(JSON.stringify({
+            players, totalScores, predictions, actuals,
+            currentRoundIndex, phase, startingPlayerIndex,
+            roundLog, hitsCount, biggestRound
+        }));
+    }
+
+    function restoreSnapshot(snap) {
+        players = snap.players;
+        totalScores = snap.totalScores;
+        predictions = snap.predictions;
+        actuals = snap.actuals;
+        currentRoundIndex = snap.currentRoundIndex;
+        phase = snap.phase;
+        startingPlayerIndex = snap.startingPlayerIndex;
+        roundLog = snap.roundLog;
+        hitsCount = snap.hitsCount;
+        biggestRound = snap.biggestRound;
+    }
+
+    function updateUndoButton() {
+        const btn = document.getElementById("undoBtn");
+        if (!btn) return;
+        btn.disabled = !lastConfirmSnapshot;
+    }
+
+    function undoLastConfirm() {
+
+        if (!lastConfirmSnapshot) return;
+
+        restoreSnapshot(lastConfirmSnapshot);
+        lastConfirmSnapshot = null;
+
+        document.getElementById("endCard").classList.add("hidden");
+        document.getElementById("homeCard").classList.add("hidden");
+        document.getElementById("setupCard").classList.add("hidden");
+        document.getElementById("gameCard").classList.remove("hidden");
+
+        setupTable();
+        roundLog.forEach(entry => upsertTableRow(entry));
+
+        updateUI();
+        updateUndoButton();
+        saveState();
+    }
+
     function initHome() {
         const saved = loadState();
         const resumeBtn = document.getElementById("resumeBtn");
@@ -835,6 +904,7 @@
         roundLog = saved.roundLog || [];
         hitsCount = saved.hitsCount || {};
         biggestRound = saved.biggestRound || null;
+        lastConfirmSnapshot = null;
 
         document.getElementById("homeCard").classList.add("hidden");
         document.getElementById("gameCard").classList.remove("hidden");
@@ -842,6 +912,7 @@
         setupTable();
         roundLog.forEach(entry => upsertTableRow(entry));
         updateUI();
+        updateUndoButton();
     }
 
     function saveAndExit() {
@@ -885,6 +956,7 @@
         hitsCount = {};
         biggestRound = null;
         currentRoundIndex = 0;
+        lastConfirmSnapshot = null;
 
         for (let i = 0; i < count; i++) {
 
@@ -901,6 +973,7 @@
         startingPlayerIndex = Math.floor(Math.random() * players.length);
 
         setupTable();
+        updateUndoButton();
 
         document.getElementById("setupCard").classList.add("hidden");
         document.getElementById("gameCard").classList.remove("hidden");
@@ -1155,6 +1228,8 @@
                 return;
             }
 
+            lastConfirmSnapshot = snapshotState();
+
             const logEntry = {
                 roundIndex: currentRoundIndex,
                 predictions: { ...predictions },
@@ -1172,12 +1247,15 @@
                 actuals[p] = 0;
             });
 
+            updateUndoButton();
             saveState();
             updateUI();
 
         } else {
 
+            lastConfirmSnapshot = snapshotState();
             finishRound();
+            updateUndoButton();
         }
     }
 
