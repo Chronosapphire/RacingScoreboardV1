@@ -20,6 +20,8 @@
             --red: #e63946;
             --green: #2ec4b6;
             --gold: #f4a300;
+            --blue: #4361ee;
+            --purple: #b5179e;
 
             --font-display: 'Oswald', sans-serif;
             --font-body: 'Inter', sans-serif;
@@ -247,6 +249,29 @@
 
         .roundInfo strong {
             color: var(--gold);
+        }
+
+        .roleLegend {
+            display: flex;
+            gap: 16px;
+            flex-wrap: wrap;
+            justify-content: center;
+            margin-bottom: 14px;
+            font-size: 12px;
+            color: var(--muted);
+        }
+
+        .roleLegend span {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .roleDot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            display: inline-block;
         }
 
         /* ---- Status bar (running total + lock message) ---- */
@@ -625,6 +650,9 @@
 
             <div id="nameSection" class="hidden">
                 <h3>buat nama kamu</h3>
+                <p style="color: var(--muted); font-size: 13px; margin-top: -6px;">
+                    Enter names in the order players sit, going clockwise — that's the order they'll appear around the circle.
+                </p>
                 <div id="nameInputs"></div>
                 <button class="primary-btn" onclick="startGame()">Start Game</button>
             </div>
@@ -641,6 +669,12 @@
             </div>
 
             <div class="roundInfo" id="roundInfo"></div>
+
+            <div class="roleLegend">
+                <span><span class="roleDot" style="background: var(--blue);"></span>Player</span>
+                <span><span class="roleDot" style="background: var(--gold);"></span>Shuffler</span>
+                <span><span class="roleDot" style="background: var(--purple);"></span>First Predictor</span>
+            </div>
 
             <div class="statusBar">
                 <div id="runningTotalBar" class="running-total"></div>
@@ -711,7 +745,11 @@
         6, 5, 4, 3, 2, 1
     ];
 
-    const DRIVER_COLORS = ['#e63946', '#2ec4b6', '#f4a300', '#4361ee', '#b5179e', '#ff8500', '#588157'];
+    const ROLE_COLORS = {
+        player: '#4361ee',
+        shuffler: '#f4a300',
+        predictor: '#b5179e'
+    };
 
     const SAVE_KEY = "racingScoreboardSave_v1";
 
@@ -915,6 +953,12 @@
         return Object.values(obj).reduce((a, b) => a + b, 0);
     }
 
+    function getShufflerIndex() {
+        let idx = startingPlayerIndex - 1;
+        if (idx < 0) idx = players.length - 1;
+        return idx;
+    }
+
     function updateUI() {
 
         const roundName = rounds[currentRoundIndex];
@@ -927,12 +971,7 @@
                 ? "Prediction Phase — tap to set each player's guess"
                 : "Actual Result Phase — tap to set each player's real count";
 
-        let shufflerIndex = startingPlayerIndex - 1;
-
-        if (shufflerIndex < 0) {
-            shufflerIndex = players.length - 1;
-        }
-
+        let shufflerIndex = getShufflerIndex();
         const shuffler = players[shufflerIndex];
 
         document.getElementById("roundInfo").innerHTML = `
@@ -959,6 +998,7 @@
         const radiusY = h * 0.38;
 
         const store = phase === "prediction" ? predictions : actuals;
+        const shufflerIndex = getShufflerIndex();
 
         players.forEach((player, i) => {
 
@@ -970,7 +1010,12 @@
             node.className = "playerNode";
             node.style.left = `${x}px`;
             node.style.top = `${y}px`;
-            node.style.setProperty("--driver-color", DRIVER_COLORS[i % DRIVER_COLORS.length]);
+
+            let roleColor = ROLE_COLORS.player;
+            if (i === startingPlayerIndex) roleColor = ROLE_COLORS.predictor;
+            else if (i === shufflerIndex) roleColor = ROLE_COLORS.shuffler;
+
+            node.style.setProperty("--driver-color", roleColor);
 
             const val = store[player] || 0;
 
